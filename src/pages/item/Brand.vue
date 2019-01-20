@@ -1,7 +1,8 @@
 <template>
   <v-card>
     <v-card-title>
-      <v-btn color="primary" @click="addBrand">新增品牌</v-btn>
+      <v-btn color="primary" outline @click="addBrand" round>新增品牌</v-btn>
+      <v-btn color="primary" @click="" outline round>删除品牌</v-btn>
       <!--搜索框，与search属性关联-->
       <v-spacer/>
       <v-flex xs3>
@@ -15,13 +16,22 @@
       :pagination.sync="pagination"
       :total-items="totalBrands"
       :loading="loading"
+      select-all
+      v-model="selected"
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
+        <td>
+          <v-checkbox
+            v-model="props.selected"
+            primary
+            hide-details
+          ></v-checkbox>
+        </td>
         <td class="text-xs-center">{{ props.item.id }}</td>
         <td class="text-xs-center">{{ props.item.name }}</td>
         <td class="text-xs-center">
-          <img v-if="props.item.image" :src="props.item.image" width="130" height="40">
+          <img v-if="props.item.image" :src="props.item.image" width="130" height="40" class="pt-1">
           <span v-else>无</span>
         </td>
         <td class="text-xs-center">{{ props.item.letter }}</td>
@@ -33,6 +43,18 @@
             <i class="el-icon-delete"/>
           </v-btn>
         </td>
+      </template>
+
+      <!-- 未加载到数据 -->
+      <template slot="no-data">
+        <v-alert :value="true" color="error" icon="warning">
+          未加载到数据
+        </v-alert>
+      </template>
+
+      <!-- 显示页数 -->
+      <template slot="pageText" slot-scope="props">
+        从 {{ props.pageStart }} 至 {{ props.pageStop }} 条，共 {{ props.itemsLength }} 条
       </template>
     </v-data-table>
     <!--弹出的对话框-->
@@ -46,7 +68,7 @@
           <v-btn icon @click="closeWindow"><v-icon>close</v-icon></v-btn>
         </v-toolbar>
         <!--对话框的内容，表单-->
-        <v-card-text class="px-5" style="height:400px">
+        <v-card-text class="px-5" style="height:435px">
           <brand-form @close="closeWindow" :oldBrand="oldBrand" :isEdit="isEdit"/>
         </v-card-text>
       </v-card>
@@ -70,13 +92,14 @@
         headers: [
           {text: 'id', align: 'center', value: 'id'},
           {text: '名称', align: 'center', sortable: false, value: 'name'},
-          {text: 'LOGO', align: 'center', sortable: false, value: 'image'},
+          {text: '品牌LOGO', align: 'center', sortable: false, value: 'image'},
           {text: '首字母', align: 'center', value: 'letter', sortable: true,},
           {text: '操作', align: 'center', value: 'id', sortable: false}
         ],
         show: false,// 控制对话框的显示
         oldBrand: {}, // 即将被编辑的品牌数据
         isEdit: false, // 是否是编辑
+        selected: []
       }
     },
     mounted() { // 渲染后执行
@@ -99,14 +122,15 @@
     },
     methods: {
       getDataFromServer() { // 从服务的加载数的方法。
+        this.loading = true;
         // 发起请求
         this.$http.get("/item/brand/page", {
           params: {
             key: this.search, // 搜索条件
-            page: this.pagination.page,// 当前页
-            rows: this.pagination.rowsPerPage,// 每页大小
+            pageNo: this.pagination.page,// 当前页
+            pageSize: this.pagination.rowsPerPage,// 每页大小
             sortBy: this.pagination.sortBy,// 排序字段
-            desc: this.pagination.descending// 是否降序
+            isDes: this.pagination.descending// 是否降序
           }
         }).then(resp => { // 这里使用箭头函数
           this.brands = resp.data.items;
@@ -123,25 +147,41 @@
         // 把oldBrand变为null
         this.oldBrand = null;
       },
-      editBrand(oldBrand){
+      editBrand(val){
+        // 修改标记
+        this.isEdit = true;
+        // 控制弹窗可见：
+        this.show = true;
+
         // 根据品牌信息查询商品分类
-        this.$http.get("/item/category/bid/" + oldBrand.id)
-          .then(({data}) => {
-            // 修改标记
-            this.isEdit = true;
-            // 控制弹窗可见：
-            this.show = true;
+        this.$http.get("/item/category/queryByBid/" + val.id).then(({data}) => {
+            val.categories=data;
             // 获取要编辑的brand
-            this.oldBrand = oldBrand
-            // 回显商品分类
-            this.oldBrand.categories = data;
-          })
+            this.oldBrand = Object.deepCopy(val);
+        })
       },
       closeWindow(){
         // 重新加载数据
         this.getDataFromServer();
         // 关闭窗口
         this.show = false;
+      },
+      deleteBrand(val){
+        this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
+          confirmButtonText: '确定删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+        //  删除品牌
+          this.$http.delete("/item/brand/deleteBrand/" + val.id).then(() => {
+            this.getDataFromServer();
+            this.$message.success("删除成功");
+          }).catch( () => {
+            this.$message.error("删除失败");
+          });
+        }).catch(()=>{
+          this.$message.info('已取消删除');
+        })
       }
     },
     components:{

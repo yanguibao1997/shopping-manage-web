@@ -13,15 +13,13 @@
         <span style="font-size: 16px; color: #444">品牌LOGO：</span>
       </v-flex>
       <v-flex>
-        <v-upload
-          v-model="brand.image" url="/upload/image" :multiple="false" :pic-width="250" :pic-height="90"
-        />
+        <v-upload v-model="brand.image" url="/upload/image" :multiple="false" :pic-width="250" :pic-height="90"/>
       </v-flex>
     </v-layout>
     <v-layout class="my-4" row>
-      <v-spacer/>
-      <v-btn @click="submit" color="primary">提交</v-btn>
-      <v-btn @click="clear">重置</v-btn>
+      <v-btn class="ml-5" @click="submit" color="primary"  round large>提交</v-btn>
+      <v-spacer class="px-2"/>
+      <v-btn class="mr-5" @click="clear" round large>重置</v-btn>
     </v-layout>
   </v-form>
 </template>
@@ -71,16 +69,15 @@
           // this.$http.post('/item/brand', this.$qs.stringify(params))
           this.$http({
             method: this.isEdit ? 'put' : 'post',
-            url: '/item/brand',
+            url: '/item/brand/addOrUpdateBrand',
             data: this.$qs.stringify(params)
           }).then(() => {
             // 关闭窗口
             this.$emit("close");
             this.$message.success("保存成功！");
-          })
-            .catch(() => {
+          }).catch(() => {
               this.$message.error("保存失败！");
-            });
+          });
         }
       },
       clear() {
