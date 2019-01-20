@@ -2,7 +2,7 @@
   <v-card>
     <v-card-title>
       <v-btn color="primary" outline @click="addBrand" round>新增品牌</v-btn>
-      <v-btn color="primary" @click="" outline round>删除品牌</v-btn>
+      <v-btn color="primary" @click="deleteBrands" outline round>删除品牌</v-btn>
       <!--搜索框，与search属性关联-->
       <v-spacer/>
       <v-flex xs3>
@@ -166,6 +166,29 @@
         // 关闭窗口
         this.show = false;
       },
+      deleteBrands(){
+        this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
+          confirmButtonText: '确定删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          /*for(const i in this.selected){
+              // console.log(i+"========================="+this.selected[i].id);
+
+            ids.join(",")
+          }*/
+          const bids=this.selected.map(s => s.id).join(",");
+
+          this.$http.delete("/item/brand/deleteBrand?bids="+ bids).then(() => {
+            this.getDataFromServer();
+            this.$message.success("删除成功");
+          }).catch( () => {
+            this.$message.error("删除失败");
+          });
+        }).catch(()=>{
+          this.$message.info('已取消删除');
+        })
+      },
       deleteBrand(val){
         this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
           confirmButtonText: '确定删除',
@@ -173,7 +196,7 @@
           type: 'warning'
         }).then(() => {
         //  删除品牌
-          this.$http.delete("/item/brand/deleteBrand/" + val.id).then(() => {
+          this.$http.delete("/item/brand/deleteBrand?bids=" + val.id).then(() => {
             this.getDataFromServer();
             this.$message.success("删除成功");
           }).catch( () => {
