@@ -70,11 +70,9 @@ export default {
   },
   methods:{
       loadData(){
-          this.$http.get("/item/spec/groups/" + this.cid)
-          .then(({data}) => {
+          this.$http.get("/item/specification/querySpecGroupByCid/" + this.cid).then(({data}) => {
               this.groups = data;
-          })
-          .catch(() => {
+          }).catch(() => {
               this.groups = [];
           })
       },
