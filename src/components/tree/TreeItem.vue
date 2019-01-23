@@ -141,8 +141,6 @@
           isParent: false,
           sort:this.model.children? this.model.children.length + 1:1
         }
-        // this.$emit("handleAdd", child);
-        console.log(this.addCategory_id);
         if (!this.model.isParent) {
           Vue.set(this.model, 'children', [child]);
           this.model.isParent = true;
@@ -193,6 +191,10 @@
         }
       },
       handleAdd(node) {
+        // console.log(node)
+       /* this.$parent.$parent.$emit("handleAdd",node, (res) => {
+          // console.log("这是回调的"+res);
+        })*/
         this.$emit("handleAdd", node);
       },
       handleDelete(id,pid) {

@@ -21,11 +21,12 @@
       }
     },
     methods: {
-      handleAdd(node,cab) {
-        console.log(node);
+      handleAdd(node) {
+        // cab("123")
+        // console.log("12122");
         // 后台添加
         this.$http.post("/item/category/addcategory",this.$qs.stringify(node)).then(res => {
-          cab(res.data.id);
+/*          cab(res.data.id);*/
           this.$message.success("添加成功");
         }).catch( error => {
           this.$message.error("添加失败");

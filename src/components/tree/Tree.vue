@@ -56,9 +56,12 @@
         })
       },
       handleAdd(node) {
-        this.$emit("handleAdd", this.copyNodeInfo(node),(res) => {
-          console.log("这是回调============"+res)
-        });
+        // console.log("tree")
+        /*this.$emit("handleAdd", this.copyNodeInfo(node),(res) => {
+          console.log("tree中的返回值-======"+res)
+          cab(res)
+        });*/
+        this.$emit("handleAdd",node)
       },
       handleEdit(id, name) {
         this.$emit("handleEdit", id, name)
