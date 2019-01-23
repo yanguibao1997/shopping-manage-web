@@ -79,6 +79,10 @@ export default {
   props: {
     group: {
       type: Object
+    },
+    cid:{
+      type: Number,
+      default:0
     }
   },
   data() {
@@ -123,15 +127,12 @@ export default {
   },
   methods: {
     loadData() {
-      this.$http
-        .get("/item/spec/params?gid=" + this.group.id)
-        .then(({ data }) => {
+      this.$http.get("/item/specification/querySpecParamByCidGid?cid="+this.cid+"&gid="+this.group.id).then(({ data }) => {
           data.forEach(p => {
               p.segments = p.segments ? p.segments.split(",").map(s => s.split("-")) : [];
           })
           this.params = data;
-        })
-        .catch(() => {
+        }).catch(() => {
           this.params = [];
         });
     },

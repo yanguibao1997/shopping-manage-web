@@ -4,10 +4,19 @@
         :headers="headers"
         :items="groups"
         hide-actions
+        select-all
+        v-model="selected"
         class="elevation-0"
         >
             <template slot="items" slot-scope="props">
                 <tr @click="selectGroup(props.item)">
+                    <td>
+                      <v-checkbox
+                        v-model="props.selected"
+                        primary
+                        hide-details
+                      ></v-checkbox>
+                    </td>
                     <td class="text-xs-center">{{ props.item.id }}</td>
                     <td class="text-xs-center">{{ props.item.name }}</td>
                     <td class="justify-center layout px-0">
@@ -25,8 +34,9 @@
             </template>
         </v-data-table>
 
-        <v-btn color='primary' @click="addGroup">新增分组</v-btn>
-        <v-dialog v-model="show" width="300" height="200">
+        <v-btn color='primary' @click="addGroup" outline round>新增分组</v-btn>
+        <v-btn color="primary" @click="deleteSomeGroup" outline round>删除分组</v-btn>
+        <v-dialog v-model="show" width="300" height="200" persistent>
         <v-toolbar dense dark color="primary">
           <v-toolbar-title>{{isEdit ? '修改' : '新增'}}分组</v-toolbar-title>
           <v-spacer/>
@@ -69,6 +79,7 @@ export default {
       show: false, // 是否打开编辑窗口
       group:{name:''},
       isEdit: false, // 是否是编辑
+      selected:[]
     };
   },
   watch:{
@@ -97,7 +108,7 @@ export default {
       save(){
            this.$http({
             method: this.isEdit ? 'put' : 'post',
-            url: '/item/specification/addSpecGroup',
+            url: '/item/specification/addOrUpdateSpecGroup',
             data: this.$qs.stringify(this.group)
           }).then(() => {
             // 关闭窗口
@@ -108,9 +119,31 @@ export default {
               this.$message.error("保存失败！");
           });
       },
+      deleteSomeGroup(){
+        this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
+          confirmButtonText: '确定删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          /*for(const i in this.selected){
+              // console.log(i+"========================="+this.selected[i].id);
+
+            ids.join(",")
+          }*/
+          const ids=this.selected.map(s => s.id).join(",");
+
+          this.$http.delete("/item/specification/deleteSpecGroup?ids="+ ids).then(() => {
+            this.loadData();
+            this.$message.success("删除成功");
+          }).catch( () => {
+            this.$message.error("删除失败");
+          });
+        }).catch(()=>{
+          this.$message.info('已取消删除');
+        })
+      },
       deleteGroup(id){
-          this.$message.confirm("确认要删除分组吗？")
-          .then(() => {
+          this.$message.confirm("确认要删除分组吗？").then(() => {
             this.$http.delete("/item/specification/deleteSpecGroup?ids=" + id)
                 .then(() => {
                     this.$message.success("删除成功");

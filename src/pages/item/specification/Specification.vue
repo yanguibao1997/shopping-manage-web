@@ -31,7 +31,7 @@
             <v-divider/>
             <v-card-text>
               <spec-group :cid="currentNode.id" v-show="showGroup" @select="selectGroup"/>
-              <spec-param :group="group" v-show="!showGroup" />
+              <spec-param :cid="currentNode.id" :group="group" v-show="!showGroup" />
             </v-card-text>
           </v-card>
         </v-flex>
