@@ -4,9 +4,14 @@
             :headers="headers"
             :items="params"
             hide-actions
+            select-all
+            v-model="selected"
             class="elevation-0"
             >
             <template slot="items" slot-scope="props">
+                <td>
+                  <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>
+                </td>
                 <td class="text-xs-center">{{ props.item.id }}</td>
                 <td class="text-xs-center">{{ props.item.name }}</td>
                 <td class="text-xs-center">{{ formatBoolean(props.item.numeric) }}</td>
@@ -27,9 +32,10 @@
                 </template>
             </v-data-table>
             <v-btn color='primary' @click="addParam"  outline round>新增参数</v-btn>
+            <v-btn color='primary' @click="deleteParams"  outline round>删除参数</v-btn>
 
             <v-layout row justify-center>
-              <v-dialog v-model="show"  max-width="300px" scrollable>
+              <v-dialog v-model="show"  max-width="300px" style="height: 300px;" scrollable>
                 <v-card>
                   <v-toolbar dense dark color="primary">
                     <v-toolbar-title>{{isEdit ? '修改' : '新增'}}参数</v-toolbar-title>
@@ -125,7 +131,8 @@ export default {
       params: [], // 参数
       show: false,
       param: {},
-      isEdit: false
+      isEdit: false,
+      selected:[]
     };
   },
   watch: {
@@ -147,10 +154,12 @@ export default {
           this.params = data;
         }).catch(() => {
           this.params = [];
+
         });
     },
     editParam(param) {
         this.param = param;
+        this.param.groupId=this.group.id;
         this.isEdit = true;
         this.show = true;
     },
@@ -165,11 +174,24 @@ export default {
       };
       this.show = true;
     },
+    deleteParams(){
+      const ids=this.selected.map(s => s.id).join(",")
+      this.$message.confirm("确认要删除该参数吗？").then(() => {
+        this.$http.delete("/item/specification/deleteSpecParam?ids=" + ids)
+          .then(() => {
+            this.loadData();
+            this.$message.success("删除成功");
+          })
+          .catch(() => {
+            this.$message.error("删除失败");
+          })
+      })
+    },
     deleteParam(id) {
-        this.$message.confirm("确认要删除该参数吗？")
-        .then(() => {
-            this.$http.delete("/item/spec/param/" + id)
+        this.$message.confirm("确认要删除该参数吗？").then(() => {
+            this.$http.delete("/item/specification/deleteSpecParam?ids=" + id)
             .then(() => {
+                this.loadData();
                 this.$message.success("删除成功");
             })
             .catch(() => {
