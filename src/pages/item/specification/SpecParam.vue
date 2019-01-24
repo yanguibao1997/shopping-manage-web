@@ -26,55 +26,68 @@
                 该分组下没有参数
                 </template>
             </v-data-table>
-            <v-btn color='primary' @click="addParam">新增参数</v-btn>
-            <v-dialog v-model="show" max-width="350px" scrollable>
-            <v-card>
-                <v-card-text style="height: 300px;">
-                    <v-flex class="px-3">
-                    <v-text-field label="参数名称：" v-model="param.name"  />
-                    <v-checkbox label="是否为通用属性" v-model="param.generic" color="primary" hide-details/>
-                    <v-checkbox label="是否为数值类型" v-model="param.numeric" color="primary" hide-details/>
-                    <v-text-field label="数值单位：" v-model="param.unit" v-if="param.numeric"/>
-                    <v-checkbox label="是否用于搜索" v-model="param.searching" color="primary" hide-details/>
-                    <v-flex v-if="param.searching && param.numeric" class="px-2">
-                        搜索过滤区间：
-                        <v-layout row wrap v-for="(s,i) in param.segments" :key="i">
+            <v-btn color='primary' @click="addParam"  outline round>新增参数</v-btn>
+
+            <v-layout row justify-center>
+              <v-dialog v-model="show"  max-width="300px" scrollable>
+                <v-card>
+                  <v-toolbar dense dark color="primary">
+                    <v-toolbar-title>{{isEdit ? '修改' : '新增'}}参数</v-toolbar-title>
+                    <v-spacer/>
+                    <v-btn icon @click="show=false"><v-icon>close</v-icon></v-btn>
+                  </v-toolbar>
+                  <v-divider></v-divider>
+                  <v-card-text>
+                      <v-flex class="px-3">
+                        <v-text-field label="参数名称：" v-model="param.name" required :rules="[ v => !!v || '必填项']"/>
+                        <v-checkbox label="是否为通用属性" v-model="param.generic" color="primary" hide-details/>
+                        <v-checkbox label="是否为数值类型" v-model="param.numeric" color="primary" hide-details/>
+                        <v-text-field label="数值单位：" v-model="param.unit" v-if="param.numeric"/>
+                        <v-checkbox label="是否用于搜索" v-model="param.searching" color="primary" hide-details/>
+                        <v-flex v-if="param.searching && param.numeric" class="px-2">
+                          搜索过滤区间：
+                          <v-layout row wrap v-for="(s,i) in param.segments" :key="i">
                             <v-flex xs5>
-                                <v-text-field prefix="From: " v-model="s[0]" single-line hide-details/>
+                              <v-text-field prefix="From: " v-model="s[0]" single-line hide-details/>
                             </v-flex>
                             <v-spacer/>
                             <v-flex xs5>
-                                <v-text-field prefix="To: " v-model="s[1]" single-line hide-details/>
+                              <v-text-field prefix="To: " v-model="s[1]" single-line hide-details/>
                             </v-flex>
                             <v-flex xs1>
-                                <v-btn icon @click="param.segments.splice(i,1)">
-                                     <i class="el-icon-delete"/>
-                                </v-btn>
+                              <v-btn icon @click="param.segments.splice(i,1)">
+                                <i class="el-icon-delete"/>
+                              </v-btn>
                             </v-flex>
-                        </v-layout>
-                        <v-layout row>
+                          </v-layout>
+                          <v-layout row>
                             <v-spacer/>
                             <v-flex xs1>
-                                <v-tooltip left>
+                              <v-tooltip left>
                                 <v-btn slot="activator" icon @click="param.segments.push([0,0])"><v-icon>add</v-icon></v-btn>
                                 <span>点击为数值类型的参数添加分段，便于搜索过滤</span>
-                                </v-tooltip>
+                              </v-tooltip>
                             </v-flex>
-                        </v-layout>
-                    </v-flex>
-                    </v-flex>
-                </v-card-text>
-                <v-card-actions>
+                          </v-layout>
+                        </v-flex>
+                      </v-flex>
+                  </v-card-text>
+                  <v-divider></v-divider>
+                  <v-card-actions>
+                    <v-btn class="ml-5" color="primary" @click.native="show=false" round>取消</v-btn>
                     <v-spacer/>
-                    <v-btn color="blue darken-1" flat @click.native="show=false">取消</v-btn>
-                    <v-btn color="blue darken-1" flat @click.native="save">保存</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                    <v-btn class="mr-5" @click.native="save" round>保存</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+            </v-layout>
     </div>
 </template>
 <script>
+import Layout from "iview/src/components/layout/layout";
+
 export default {
+  components: {Layout},
   name: "v-spec-param",
   props: {
     group: {
@@ -148,7 +161,8 @@ export default {
           segments:[],
           numeric:false,
           searching:false,
-          generic:false}
+          generic:false
+      };
       this.show = true;
     },
     deleteParam(id) {
@@ -170,18 +184,22 @@ export default {
         const p = {};
         Object.assign(p, this.param);
         p.segments = p.segments.map(s => s.join("-")).join(",")
-        this.$http({
+        if(p.name){
+          this.$http({
             method: this.isEdit ? 'put' : 'post',
-            url: '/item/spec/param',
-            data: p,
-        }).then(() => {
+            url: '/item/specification/addOrUpdateSpecParam',
+            data: this.$qs.stringify(p),
+          }).then(() => {
             // 关闭窗口
             this.show = false;
             this.$message.success("保存成功！");
             this.loadData();
           }).catch(() => {
-              this.$message.error("保存失败！");
-            });
+            this.$message.error("保存失败！");
+          });
+        }else{
+          this.$message.info("请检查必填项！");
+        }
     }
   }
 };

@@ -43,7 +43,7 @@
           <!--关闭窗口的按钮-->
           <v-btn icon @click="show=false"><v-icon>close</v-icon></v-btn>
         </v-toolbar>
-        <v-card >
+        <v-card>
             <v-card-text>
                 <v-text-field label="分组名称：" v-model="group.name"  />
             </v-card-text>
