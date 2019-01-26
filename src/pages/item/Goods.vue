@@ -136,8 +136,8 @@
           params: {
             key: this.filter.search, // 搜索条件
             saleable: this.filter.saleable === 0 ? null : this.filter.saleable, // 上下架
-            page: this.pagination.page,// 当前页
-            rows: this.pagination.rowsPerPage,// 每页大小
+            pageNo: this.pagination.page,// 当前页
+            pageSize: this.pagination.rowsPerPage,// 每页大小
           }
         }).then(resp => { // 这里使用箭头函数
           this.goodsList = resp.data.items;

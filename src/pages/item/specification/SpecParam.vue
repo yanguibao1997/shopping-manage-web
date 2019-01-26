@@ -175,17 +175,22 @@ export default {
       this.show = true;
     },
     deleteParams(){
-      const ids=this.selected.map(s => s.id).join(",")
-      this.$message.confirm("确认要删除该参数吗？").then(() => {
-        this.$http.delete("/item/specification/deleteSpecParam?ids=" + ids)
-          .then(() => {
-            this.loadData();
-            this.$message.success("删除成功");
+      if(this.selected.length>0){
+          const ids=this.selected.map(s => s.id).join(",")
+          this.$message.confirm("确认要删除该参数吗？").then(() => {
+            this.$http.delete("/item/specification/deleteSpecParam?ids=" + ids)
+              .then(() => {
+                this.selected=[];
+                this.loadData();
+                this.$message.success("删除成功");
+              })
+              .catch(() => {
+                this.$message.error("删除失败");
+              })
           })
-          .catch(() => {
-            this.$message.error("删除失败");
-          })
-      })
+      }else{
+        this.$message.info("至少选择一个");
+      }
     },
     deleteParam(id) {
         this.$message.confirm("确认要删除该参数吗？").then(() => {

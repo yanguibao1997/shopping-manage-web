@@ -120,27 +120,32 @@ export default {
           });
       },
       deleteSomeGroup(){
-        this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
-          confirmButtonText: '确定删除',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          /*for(const i in this.selected){
+        if(this.selected.length>0) {
+          this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
+            confirmButtonText: '确定删除',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            /*for(const i in this.selected){
               // console.log(i+"========================="+this.selected[i].id);
 
             ids.join(",")
           }*/
-          const ids=this.selected.map(s => s.id).join(",");
+            const ids = this.selected.map(s => s.id).join(",");
 
-          this.$http.delete("/item/specification/deleteSpecGroup?ids="+ ids).then(() => {
-            this.loadData();
-            this.$message.success("删除成功");
-          }).catch( () => {
-            this.$message.error("删除失败");
-          });
-        }).catch(()=>{
-          this.$message.info('已取消删除');
-        })
+            this.$http.delete("/item/specification/deleteSpecGroup?ids=" + ids).then(() => {
+              this.selected=[];
+              this.loadData();
+              this.$message.success("删除成功");
+            }).catch(() => {
+              this.$message.error("删除失败");
+            });
+          }).catch(() => {
+            this.$message.info('已取消删除');
+          })
+        }else{
+          this.$message.info("至少选择一个");
+        }
       },
       deleteGroup(id){
           this.$message.confirm("确认要删除分组吗？").then(() => {
