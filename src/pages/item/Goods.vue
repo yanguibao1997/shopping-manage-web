@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-toolbar class="elevation-0">
-      <v-btn color="primary" @click="addGoods">新增商品</v-btn>
+      <v-btn color="primary" @click="addGoods" round outline>新增商品</v-btn>
       <v-spacer/>
       <v-flex xs3>
         状态：
@@ -68,6 +68,7 @@
         <!--对话框的内容，表单-->
         <v-card-text class="px-3" style="height: 600px">
           <goods-form :oldGoods="oldGoods" :step="step" @close="closeWindow" :is-edit="isEdit" ref="goodsForm"/>
+          <!--<my-goods-form></my-goods-form>-->
         </v-card-text>
         <!--底部按钮，用来操作步骤线-->
         <v-card-actions class="elevation-10">
@@ -84,6 +85,8 @@
 <script>
   // 导入自定义的表单组件
   import GoodsForm from './GoodsForm'
+
+  import MyGoodsForm from './myGoodsForm'
 
   export default {
     name: "goods",
@@ -186,7 +189,8 @@
       }
     },
     components: {
-      GoodsForm
+      GoodsForm,
+      MyGoodsForm
     }
   }
 </script>

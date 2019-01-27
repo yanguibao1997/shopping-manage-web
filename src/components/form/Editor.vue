@@ -14,7 +14,7 @@
         </select>
         <!-- Add subscript and superscript buttons -->
         <span class="ql-formats"><button class="ql-script" value="sub"></button></span>
-        <span class="ql-formats"><button class="ql-script" value="super"></button></button></span>
+        <span class="ql-formats"><button class="ql-script" value="super"></button></span>
         <span class="ql-formats"><button type="button" class="ql-bold"></button></span>
         <span class="ql-formats"><button type="button" class="ql-italic"></button></span>
         <span class="ql-formats"><button type="button" class="ql-blockquote"></button></span>
@@ -22,12 +22,14 @@
         <span class="ql-formats"><button type="button" class="ql-list" value="bullet"></button></span>
         <span class="ql-formats"><button type="button" class="ql-link"></button></span>
         <span class="ql-formats">
-        <button type="button" @click="imgClick" style="outline:none">
-        <svg viewBox="0 0 18 18"> <rect class="ql-stroke" height="10" width="12" x="3" y="4"></rect> <circle
-          class="ql-fill" cx="6" cy="7" r="1"></circle> <polyline class="ql-even ql-fill"
-                                                                  points="5 12 5 11 7 9 8 10 11 7 13 9 13 12 5 12"></polyline> </svg>
-        </button>
-      </span>
+          <button type="button" @click="imgClick" style="outline:none">
+            <svg viewBox="0 0 18 18">
+              <rect class="ql-stroke" height="10" width="12" x="3" y="4"></rect>
+              <circle class="ql-fill" cx="6" cy="7" r="1"></circle>
+              <polyline class="ql-even ql-fill" points="5 12 5 11 7 9 8 10 11 7 13 9 13 12 5 12"></polyline>
+            </svg>
+          </button>
+        </span>
         <span class="ql-formats"><button type="button" class="ql-video"></button></span>
       </div>
     </quilleditor>
@@ -90,12 +92,11 @@
         }
         var data = new FormData;
         data.append(this.fileName, fileInput.files[0]);
-        this.$http.post(this.uploadUrl, data)
-          .then(res => {
+        this.$http.post(this.uploadUrl, data).then(res => {
             if (res.data) {
               this.editor.insertEmbed(self.editor.getSelection().index, 'image', res.data)
             }
-          })
+        })
       },
       /*点击上传图片按钮*/
       imgClick() {

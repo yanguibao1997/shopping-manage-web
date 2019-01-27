@@ -277,11 +277,9 @@ export default {
         // 判断商品分类是否存在，存在才查询
         if (val && val.length > 0) {
           // 根据分类查询品牌
-          this.$http
-            .get("/item/brand/cid/" + this.goods.categories[2].id)
-            .then(({ data }) => {
+          this.$http.get("/item/brand/queryBrandByCid?cid=" + this.goods.categories[2].id).then(({ data }) => {
               this.brandOptions = data;
-            });
+          });
           // 根据分类查询规格参数
           this.$http
             .get("/item/spec/params?cid=" + this.goods.categories[2].id)
