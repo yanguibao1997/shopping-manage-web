@@ -60,7 +60,7 @@
       },
       maxUploadSize:{
         type:Number,
-        default: 1024 * 1024 * 5
+        default: 1024*1024*5
       }
     },
     data() {
@@ -75,7 +75,7 @@
     },
     methods: {
       onChange() {
-        this.$emit('input', this.content)
+        this.$emit('range', this.content)
       },
       /*选择上传图片切换*/
       onFileChange(e) {
@@ -85,17 +85,13 @@
         if (fileInput.files.length === 0) {
           return
         }
-
-
         this.editor.focus();
-
-
         // console.log("图片大小"+fileInput.files[0].size);
 
         // console.log("设置大小"+this.maxUploadSize);
 
         if (fileInput.files[0].size > this.maxUploadSize) {
-          /*this.$alert('图片不能大于5M', '图片尺寸过大', {
+          /*this.$alert('图片不能大于5M', {
             confirmButtonText: '确定',
             type: 'warning',
           });*/
@@ -105,11 +101,17 @@
 
         var data = new FormData;
         data.append(this.fileName, fileInput.files[0]);
-        this.$http.post(this.uploadUrl, data).then(res => {
+
+        this.$http.post(this.uploadUrl, data).then( res => {
             if (res.data) {
-              this.editor.insertEmbed(self.editor.getSelection().index, 'image', res.data)
+              // console.log(res.data);
+              // insertEmbed    当点击quill中上传文件的button后调用
+              // 这里url是先上传文件后从服务器返回的文件资源地址
+              // this.quill.getSelection()
+              var range = this.$refs.myTextEditor.quill.getSelection();
+              this.editor.insertEmbed(range.index, 'image', res.data)
             }
-        })
+        });
       },
       /*点击上传图片按钮*/
       imgClick() {
@@ -118,6 +120,7 @@
           return;
         }
         /*内存创建input file*/
+
         var input = document.createElement('input');
         input.type = 'file';
 

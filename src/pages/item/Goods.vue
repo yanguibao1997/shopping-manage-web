@@ -73,8 +73,8 @@
         <!--底部按钮，用来操作步骤线-->
         <v-card-actions class="elevation-10">
           <v-flex class="xs3 mx-auto">
-            <v-btn @click="previous" color="primary" :disabled="step === 1">上一步</v-btn>
-            <v-btn @click="next" color="primary" :disabled="step === 4">下一步</v-btn>
+            <v-btn @click="previous" color="primary" :disabled="step === 1" round>上一步</v-btn>
+            <v-btn @click="next" color="primary" :disabled="step === 4" round>下一步</v-btn>
           </v-flex>
         </v-card-actions>
       </v-card>

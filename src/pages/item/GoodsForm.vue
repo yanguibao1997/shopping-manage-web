@@ -64,8 +64,7 @@
             <v-container grid-list-md fluid>
             <v-layout wrap row justify-space-between class="px-5">
               <v-flex xs12 sm5 v-for="param in specs" :key="param.name">
-                <v-text-field :label="param.name" v-model="param.v" :suffix="param.unit || ''"
-                 />
+                <v-text-field :label="param.name" v-model="param.v" :suffix="param.unit || ''"/>
               </v-flex>
             </v-layout>
           </v-container>
@@ -281,10 +280,13 @@ export default {
               this.brandOptions = data;
           });
           // 根据分类查询规格参数
-          this.$http
-            .get("/item/spec/params?cid=" + this.goods.categories[2].id)
-            .then(({ data }) => {
-              let specs = [];
+          this.$http.get("/item/specification/querySpecParamByCidGid?cid=" + this.goods.categories[2].id).then(({ data }) => {
+            data.forEach( ({id,name,generic,numeric,unit}) => {
+              console.log("id="+id+"  name="+generic+"   generic="+"   numeric="+numeric+"  unit="+unit);
+            });
+
+
+            let specs = [];
               let template = [];
               if (this.isEdit){
                 specs = JSON.parse(this.goods.spuDetail.genericSpec);
