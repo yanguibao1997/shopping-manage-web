@@ -60,7 +60,7 @@
       },
       maxUploadSize:{
         type:Number,
-        default: 1024 * 1024 * 500
+        default: 1024 * 1024 * 5
       }
     },
     data() {
@@ -79,17 +79,30 @@
       },
       /*选择上传图片切换*/
       onFileChange(e) {
+        //target 事件属性可返回事件的目标节点（触发该事件的节点），如生成事件的元素、文档或窗口
         var fileInput = e.target;
+
         if (fileInput.files.length === 0) {
           return
         }
+
+
         this.editor.focus();
+
+
+        // console.log("图片大小"+fileInput.files[0].size);
+
+        // console.log("设置大小"+this.maxUploadSize);
+
         if (fileInput.files[0].size > this.maxUploadSize) {
-          this.$alert('图片不能大于500KB', '图片尺寸过大', {
+          /*this.$alert('图片不能大于5M', '图片尺寸过大', {
             confirmButtonText: '确定',
             type: 'warning',
-          })
+          });*/
+
+          this.$message.error("图片不能大于5M");
         }
+
         var data = new FormData;
         data.append(this.fileName, fileInput.files[0]);
         this.$http.post(this.uploadUrl, data).then(res => {
@@ -107,8 +120,13 @@
         /*内存创建input file*/
         var input = document.createElement('input');
         input.type = 'file';
+
+        //默认的名字为  file
         input.name = this.fileName;
+
+        //在文件上传中使用 accept 属性
         input.accept = 'image/jpeg,image/png,image/jpg,image/gif';
+        // input.multiple=true;
         input.onchange = this.onFileChange;
         input.click()
       }
