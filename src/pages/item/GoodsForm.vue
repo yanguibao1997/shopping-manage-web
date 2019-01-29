@@ -54,7 +54,7 @@
       </v-stepper-content>
       <!--2、商品描述-->
       <v-stepper-content step="2">
-        <v-editor v-model="goods.spuDetail.description" upload-url="/upload/image"/>
+        <v-editor v-model="goods.spuDetail.description" @content="changeDescription" upload-url="/upload/image"/>
       </v-stepper-content>
       <!--3、规格参数-->
       <v-stepper-content step="3">
@@ -63,6 +63,7 @@
           <v-card class="my-2">
             <v-container grid-list-md fluid>
             <v-layout wrap row justify-space-between class="px-5">
+              <!--通用的参数-->
               <v-flex xs12 sm5 v-for="param in specs" :key="param.name">
                 <v-text-field :label="param.name" v-model="param.v" :suffix="param.unit || ''"/>
               </v-flex>
@@ -83,7 +84,6 @@
               <div v-for="i in spec.options.length+1" :key="i" class="layout row px-5">
                 <v-text-field :placeholder="'新的' + spec.name + ':'" class="flex xs10" auto-grow
                               v-model="spec.options[i-1]" v-bind:value="i" single-line hide-details/>
-
                 <v-btn @click="spec.options.splice(i-1,1)" v-if="i <= spec.options.length" icon>
                   <i class="el-icon-delete"/>
                 </v-btn>
@@ -166,6 +166,9 @@ export default {
     };
   },
   methods: {
+    changeDescription(content){
+      this.goods.spuDetail.description=content;
+    },
     submit() {
       // 表单校验。
       if(!this.$refs.basic.validate){
@@ -281,38 +284,40 @@ export default {
           });
           // 根据分类查询规格参数
           this.$http.get("/item/specification/querySpecParamByCidGid?cid=" + this.goods.categories[2].id).then(({ data }) => {
-            data.forEach( ({id,name,generic,numeric,unit}) => {
-              console.log("id="+id+"  name="+generic+"   generic="+"   numeric="+numeric+"  unit="+unit);
-            });
-
-
             let specs = [];
-              let template = [];
-              if (this.isEdit){
-                specs = JSON.parse(this.goods.spuDetail.genericSpec);
-                template = JSON.parse(this.goods.spuDetail.specialSpec);
-              }
-              // 对特有规格进行筛选
-              const arr1 = [];
-              const arr2 = [];
-              data.forEach(({id, name,generic, numeric, unit }) => {
-                if(generic){
-                  const o = { id, name, numeric, unit};
-                  if(this.isEdit){
-                    o.v = specs[id];
-                  }
-                  arr1.push(o)
-                }else{
-                  const o = {id, name, options:[]};
-                  if(this.isEdit){
-                    o.options = template[id];
-                  }
-                  arr2.push(o)
+            let template = [];
+            //新增没有
+            if (this.isEdit){
+              //通用属性值
+              specs = JSON.parse(this.goods.spuDetail.genericSpec);
+              //特有属性值
+              template = JSON.parse(this.goods.spuDetail.specialSpec);
+            }
+            // 对特有规格进行筛选
+            const arr1 = [];
+            const arr2 = [];
+            data.forEach(({id, name,generic, numeric, unit }) => {
+              console.log("是否通用====》"+generic);
+              if(generic==1){
+                //是通用属性
+                const o = { id, name, numeric, unit};
+                if(this.isEdit){
+                  o.v = specs[id];
                 }
-              });
-              this.specs = arr1;// 通用规格
-              this.specialSpecs = arr2;// 特有规格
+                arr1.push(o)
+              }else{
+                const o = {id, name, options:[]};
+                if(this.isEdit){
+                  o.options = template[id];
+                }
+                arr2.push(o)
+              }
             });
+            this.specs = arr1;// 通用规格
+            this.specialSpecs = arr2;// 特有规格
+            // this.specs.forEach(a => console.log("通用的=====》"+JSON.stringify(a)));
+            // this.specialSpecs.forEach(a => console.log("特有的=====》"+JSON.stringify(a)));
+          });
         }
       }
     }

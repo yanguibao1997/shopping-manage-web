@@ -153,6 +153,12 @@
           }
         }
       },
+      content:{
+        handler(newVal){
+          this.$emit("content",newVal);
+        },
+        deep:true
+      }
     }
   }
 
