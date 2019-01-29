@@ -109,7 +109,7 @@
               // 这里url是先上传文件后从服务器返回的文件资源地址
               // this.quill.getSelection()
               var range = this.$refs.myTextEditor.quill.getSelection();
-              this.editor.insertEmbed(range.index, 'image', res.data)
+              this.editor.insertEmbed(range.index, 'image', res.data);
             }
         });
       },

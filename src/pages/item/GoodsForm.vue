@@ -76,6 +76,7 @@
       <v-stepper-content step="4">
         <v-flex class="mx-auto">
           <!--遍历特有规格参数-->
+          <!-- specialSpecs  特有属性 -->
           <v-card flat v-for="spec in specialSpecs" :key="spec.name">
             <!--特有参数的标题-->
             <div class="subheading">{{spec.name}}:</div>
@@ -90,6 +91,7 @@
               </div>
             </v-card-text>
           </v-card>
+
           <v-card class="elevation-0">
             <!--标题-->
             <div class="subheading py-3">SKU列表:</div>
@@ -331,6 +333,7 @@ export default {
         (last, spec, index) => {
           const result = [];
           last.forEach(o => {
+            console.log("o=======>"+JSON.stringify(o));
             spec.options.forEach((option, i) => {
               const obj = JSON.parse(JSON.stringify(o));
               obj[spec.name] = {v:option, id:spec.id};

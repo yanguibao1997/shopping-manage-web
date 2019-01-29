@@ -164,6 +164,7 @@ export default {
         this.show = true;
     },
     addParam() {
+      this.isEdit = false;
       this.param = {
           cid: this.group.cid,
           groupId: this.group.id,
