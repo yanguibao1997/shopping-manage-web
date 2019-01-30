@@ -212,9 +212,9 @@ export default {
         const p = {};
         Object.assign(p, this.param);
         p.segments = p.segments.map(s => s.join("-")).join(",");
-        p.numeric=this.changeInteger(p.numeric);
-        p.generic=this.changeInteger(p.generic);
-        p.searching=this.changeInteger(p.searching);
+        // p.numeric=this.changeInteger(p.numeric);
+        // p.generic=this.changeInteger(p.generic);
+        // p.searching=this.changeInteger(p.searching);
         if(p.name){
           this.$http({
             method: this.isEdit ? 'put' : 'post',

@@ -101,8 +101,7 @@
               <template slot="items" slot-scope="props">
                 <tr @click="props.expanded = !props.expanded">
                   <!--价格和库存展示为文本框-->
-                  <td v-for="(v,k) in props.item" :key="k" v-if="['price', 'stock'].includes(k)"
-                      class="text-xs-center">
+                  <td v-for="(v,k) in props.item" :key="k" v-if="['price', 'stock'].includes(k)" class="text-xs-center">
                     <v-text-field single-line v-model="props.item[k]" @click.stop=""/>
                   </td>
                   <!--enable展示为checkbox-->
@@ -299,7 +298,7 @@ export default {
             const arr1 = [];
             const arr2 = [];
             data.forEach(({id, name,generic, numeric, unit }) => {
-              console.log("是否通用====》"+generic);
+              // console.log("是否通用====》"+generic);
               if(generic==1){
                 //是通用属性
                 const o = { id, name, numeric, unit};
@@ -328,17 +327,50 @@ export default {
     skus() {
       // 过滤掉用户没有填写数据的规格参数
       const arr = this.specialSpecs.filter(s => s.options.length > 0);
+      console.log("arr"+JSON.stringify(arr))
+      //arr[{"id":29,"name":"颜色宝","options":["红"]},{"id":30,"name":"内存宝","options":["3G","4G"]}]
+
       // 通过reduce进行累加笛卡尔积
-      return arr.reduce(
-        (last, spec, index) => {
+      //reduce() 方法接受四个参数：初始值（或者上一次回调函数的返回值），当前元素值，当前索引，调用 reduce() 的数组。
+      const a=arr.reduce( (last, spec, index) => {
+          /*console.log("last===>"+JSON.stringify(last));
+          console.log("spec===>"+JSON.stringify(spec));
+          console.log("index===>"+JSON.stringify(index));*/
+          /*
+          * last===>[{}]
+          * spec===>{"id":29,"name":"颜色宝","options":["红"]}
+          * index===>0
+          *
+          * last===>[{"颜色宝":{"v":"红","id":29},"indexes":"_0"}]
+          * spec===>{"id":30,"name":"内存宝","options":["3G","4G"]}
+          * index===>1
+          * */
           const result = [];
           last.forEach(o => {
-            console.log("o=======>"+JSON.stringify(o));
+            //1)  第一次进来时    last为空====>  o为空
+            //                   spec为当前元素====>  {"id":29,"name":"颜色宝","options":["红"]}
+            //2)  第二次进来时    last==>[{"颜色宝":{"v":"红","id":29},"indexes":"_0"}]
+            //                   spec===>{"id":30,"name":"内存宝","options":["3G","4G"]}
             spec.options.forEach((option, i) => {
+              //    i  为option的 索引
+
+              //1) 第一次obj为空
+              //2) [1] obj 为  {"颜色宝":{"v":"红","id":29},"indexes":"_0"}
+              //   [2] obj 为  {"颜色宝":{"v":"红","id":29},"indexes":"_0"}
+              // {"颜色宝":{"v":"红","id":29},"内存宝":{"v":"3G","id":"30"},"indexes:0_0","price":"0","stock":0,"enable":false,"image":[]}
               const obj = JSON.parse(JSON.stringify(o));
+
+              //1) 颜色宝:{v:红,id:29}
+              //2) [1] 内存宝:{v:3G,id:30}
+              //   [2] 内存宝:{v:4G,id:30}
               obj[spec.name] = {v:option, id:spec.id};
+              //1) indexes:_0
+              //2) [1] indexes:_0_0
+              //   [2] indexes:_0_1
               obj.indexes = (obj.indexes || '') + '_' +  i
               if (index === arr.length - 1) {
+                //2) [1] indexes:0_0
+                //   [2] indexes:0_1
                 obj.indexes = obj.indexes.substring(1);
                 // 如果发现是最后一组，则添加价格、库存等字段
                 Object.assign(obj, {
@@ -361,13 +393,43 @@ export default {
                   }
                 }
               }
+              //1) obj   =====>   颜色宝:{v:红,id:29},indexes:_0
+              //2) [1] obj   =====>   颜色宝:{v:红,id:29},内存宝:{v:3G,id:30},indexes:0_0,price:0,stock:0,enable:false,image:[]
+              //   [2] obj   =====>   颜色宝:{v:红,id:29},内存宝:{v:4G,id:30},indexes:0_1,price:0,stock:0,enable:false,image:[]
+
+              // console.log("obj=====>"+JSON.stringify(obj));
               result.push(obj);
+              // console.log("result=====>"+JSON.stringify(result));
             });
+
           });
           return result;
         },
         [{}]
       );
+
+      /*
+      最后返回格式
+      [
+        { "颜色宝" :{ "v" : "红","id" : 29 },
+          "indexes" : "0_0",
+          "内存宝" :{ "v" : "3G","id" : 30 },
+          "price" : 0,
+          "stock" : 0,
+          "enable" : FALSE,
+          "images" :[]
+        },
+        { "颜色宝" :{ "v" : "红","id" : 29 },
+          "indexes" : "0_1",
+          "内存宝" :{ "v" : "4G","id" : 30 },
+          "price" : 0,
+          "stock" : 0,
+          "enable" : FALSE,
+          "images" :[]
+        }
+      ]*/
+      // console.log(JSON.stringify(a));
+      return a;
     },
     headers() {
       if (this.skus.length <= 0) {
