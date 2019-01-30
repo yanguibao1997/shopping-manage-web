@@ -191,9 +191,7 @@ export default {
         specTemplate[id] = options;
       });
       // 处理sku
-      const skus = this.skus
-        .filter(s => s.enable)
-        .map(({ price, stock, enable, images, indexes, ...rest }) => {
+      const skus = this.skus.filter(s => s.enable).map(({ price, stock, enable, images, indexes, ...rest }) => {
           // 标题，在spu的title基础上，拼接特有规格属性值
           const title = goodsParams.title + " " + Object.values(rest).map(v => v.v).join(" ");
           const obj = {};
@@ -223,16 +221,14 @@ export default {
         method: this.isEdit ? "put" : "post",
         url: "/item/goods",
         data: goodsParams
-      })
-        .then(() => {
+      }).then(() => {
           // 成功，关闭窗口
           this.$emit("close");
           // 提示成功
           this.$message.success("保存成功了");
-        })
-        .catch(() => {
+      }).catch(() => {
           this.$message.error("保存失败！");
-        });
+      });
     }
   },
   watch: {
@@ -327,7 +323,7 @@ export default {
     skus() {
       // 过滤掉用户没有填写数据的规格参数
       const arr = this.specialSpecs.filter(s => s.options.length > 0);
-      console.log("arr"+JSON.stringify(arr))
+      // console.log("arr"+JSON.stringify(arr))
       //arr[{"id":29,"name":"颜色宝","options":["红"]},{"id":30,"name":"内存宝","options":["3G","4G"]}]
 
       // 通过reduce进行累加笛卡尔积
