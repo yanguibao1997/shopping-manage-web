@@ -2,9 +2,9 @@
   <v-card>
     <v-toolbar class="elevation-0">
       <v-btn color="primary" @click="addGoods" round outline>新增商品</v-btn>
-      <v-btn color="primary" v-if="selected.length>0" round outline>删除商品</v-btn>
-      <v-btn color="mycolor" v-if="selected.length>0" round>商品上架</v-btn>
-      <v-btn color="mycolor" v-if="selected.length>0" round>商品下架</v-btn>
+      <v-btn color="primary" v-if="selected.length>0" @click="deleteGoods" round outline>删除商品</v-btn>
+      <v-btn color="mycolor" v-if="selected.length>0" @click="upGoods" round>商品上架</v-btn>
+      <v-btn color="mycolor" v-if="selected.length>0" @click="downGoods" round>商品下架</v-btn>
       <v-spacer/>
       <v-flex xs3>
         状态：
@@ -49,11 +49,12 @@
         <td class="text-xs-center">{{ props.item.title }}</td>
         <td class="text-xs-center">{{props.item.cname}}</td>
         <td class="text-xs-center">{{ props.item.bname }}</td>
+        <td class="text-xs-center">{{ props.item.valid?"是":"否"}}</td>
         <td class="justify-center layout px-0">
-          <v-btn icon @click="editGoods(props.item)">
+          <v-btn icon @click="editGoods(props.item,props.item.valid)">
             <i class="el-icon-edit"/>
           </v-btn>
-          <v-btn icon>
+          <v-btn icon @click="deleteGood(props.item.id)">
             <i class="el-icon-delete"/>
           </v-btn>
           <v-btn icon v-if="props.item.saleable" @click="upOrDownGood('down',props.item.id)">下架</v-btn>
@@ -114,6 +115,7 @@
           {text: '标题', align: 'center', sortable: false, value: 'title'},
           {text: '商品分类', align: 'center', sortable: false, value: 'cname'},
           {text: '品牌', align: 'center', value: 'bname', sortable: false,},
+          {text: '是否可用', align: 'center', value: 'valid', sortable: false,},
           {text: '操作', align: 'center', sortable: false}
         ],
         show: false,// 控制对话框的显示
@@ -159,7 +161,15 @@
           this.loading = false;
         })
       },
-      upOrDownGood(flg,spuId){
+      upGoods(){
+        const spuIds=this.selected.map( s => s.id).join(",");
+        this.upOrDownGood("up",spuIds)
+      },
+      downGoods(){
+        const spuIds=this.selected.map( s => s.id).join(",");
+        this.upOrDownGood("down",spuIds)
+      },
+      upOrDownGood(flg,spuIds){
         //商品上下架
         let saleable=false;
         let flagName='下架';
@@ -172,7 +182,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$http.put("/item/spu/upOrDownSpuBySpuId?saleable="+ saleable+"&spuId="+spuId).then(() => {
+          this.$http.put("/item/spu/upOrDownSpuBySpuId?saleable="+ saleable+"&spuIds="+spuIds).then(() => {
             this.getDataFromServer();
             this.$message.success(flagName+"成功");
           }).catch( () => {
@@ -182,6 +192,26 @@
           this.$message.info('已取消'+flagName);
         });
       },
+      deleteGood(spuIds){
+        this.$message.confirm('此操作将永久删除数据，是否继续?', '提示', {
+          confirmButtonText: '确定删除',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http.delete("/item/spu/deleteSpuBySpuId?spuIds="+ spuIds).then(() => {
+            this.getDataFromServer();
+            this.$message.success("删除成功");
+          }).catch( () => {
+            this.$message.error("删除失败");
+          });
+        }).catch(()=>{
+          this.$message.info('已取消删除');
+        })
+      },
+      deleteGoods: function () {
+        const spuIds=this.selected.map(s => s.id).join(",");
+        this.deleteGood(spuIds);
+      },
       addGoods() {
         // 修改标记
         this.isEdit = false;
@@ -190,7 +220,12 @@
         // 把oldBrand变为null
         this.oldGoods = {};
       },
-      async editGoods(oldGoods) {
+      async editGoods(oldGoods,valid) {
+        //商品不可用则不可以修改
+        if(!valid){
+          this.$message.warning("商品不可用,无法修改");
+          return;
+        }
         // 发起请求，查询商品详情和skus
         oldGoods.spuDetail = await this.$http.loadData("/item/spuDetail/querySpuDetailBySpuId/" + oldGoods.id);
         oldGoods.skus = await this.$http.loadData("/item/sku/querySkuBySpuId?spuId=" + oldGoods.id);
