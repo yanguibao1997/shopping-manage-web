@@ -180,6 +180,9 @@ export default {
         categories: [{ id: cid1 }, { id: cid2 }, { id: cid3 }],
         ...goodsParams
       } = this.goods;
+
+      // console.log("goodsParams========>"+JSON.stringify(goodsParams));
+
       // 处理规格参数
       const specs = {};
       this.specs.forEach(({ id,v }) => {
@@ -190,14 +193,19 @@ export default {
       this.specialSpecs.forEach(({ id, options }) => {
         specTemplate[id] = options;
       });
-      // 处理sku
+      // 处理sku   过滤未选中的SKU
       const skus = this.skus.filter(s => s.enable).map(({ price, stock, enable, images, indexes, ...rest }) => {
+
+          // console.log("rest=====>"+JSON.stringify(rest));
+          //rest=====>{"颜色宝":{"v":"红","id":29},"内存宝":{"v":"4G","id":30},"网络":{"v":"无线","id":32}}
           // 标题，在spu的title基础上，拼接特有规格属性值
           const title = goodsParams.title + " " + Object.values(rest).map(v => v.v).join(" ");
           const obj = {};
+          //循环  对象的值   得到特有属性值
           Object.values(rest).forEach(v => {
             obj[v.id] = v.v;
           });
+
           return {
             price: this.$format(price), // 价格需要格式化
             stock,
@@ -207,7 +215,7 @@ export default {
             images: images ? images.join(",") : '', // 图片
             ownSpec: JSON.stringify(obj) // 特有规格参数
           };
-        });
+      });
       Object.assign(goodsParams, {
         cid1,
         cid2,
@@ -219,7 +227,7 @@ export default {
 
       this.$http({
         method: this.isEdit ? "put" : "post",
-        url: "/item/goods",
+        url: "/item/goods/addOrUpdateGoods",
         data: goodsParams
       }).then(() => {
           // 成功，关闭窗口

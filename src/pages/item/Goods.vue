@@ -2,6 +2,9 @@
   <v-card>
     <v-toolbar class="elevation-0">
       <v-btn color="primary" @click="addGoods" round outline>新增商品</v-btn>
+      <v-btn color="primary" v-if="selected.length>0" round outline>删除商品</v-btn>
+      <v-btn color="mycolor" v-if="selected.length>0" round>商品上架</v-btn>
+      <v-btn color="mycolor" v-if="selected.length>0" round>商品下架</v-btn>
       <v-spacer/>
       <v-flex xs3>
         状态：
@@ -34,9 +37,14 @@
       :pagination.sync="pagination"
       :total-items="totalGoods"
       :loading="loading"
+      select-all
+      v-model="selected"
       class="elevation-1"
     >
       <template slot="items" slot-scope="props">
+        <td class="text-xs-center">
+          <v-checkbox v-model="props.selected" primary hide-details></v-checkbox>
+        </td>
         <td class="text-xs-center">{{ props.item.id }}</td>
         <td class="text-xs-center">{{ props.item.title }}</td>
         <td class="text-xs-center">{{props.item.cname}}</td>
@@ -48,8 +56,8 @@
           <v-btn icon>
             <i class="el-icon-delete"/>
           </v-btn>
-          <v-btn icon v-if="props.item.saleable">下架</v-btn>
-          <v-btn icon v-else>上架</v-btn>
+          <v-btn icon v-if="props.item.saleable" @click="upOrDownGood('down',props.item.id)">下架</v-btn>
+          <v-btn icon v-else @click="upOrDownGood('up',props.item.id)">上架</v-btn>
         </td>
       </template>
     </v-data-table>
@@ -87,6 +95,7 @@
   import GoodsForm from './GoodsForm'
 
   import MyGoodsForm from './myGoodsForm'
+  import Checkbox from "iview/src/components/checkbox/checkbox";
 
   export default {
     name: "goods",
@@ -111,6 +120,7 @@
         oldGoods: {}, // 即将被编辑的商品信息
         isEdit: false, // 是否是编辑
         step: 1, // 子组件中的步骤线索引，默认为1
+        selected:[]
       }
     },
     mounted() { // 渲染后执行
@@ -149,6 +159,29 @@
           this.loading = false;
         })
       },
+      upOrDownGood(flg,spuId){
+        //商品上下架
+        let saleable=false;
+        let flagName='下架';
+        if(flg=="up"){
+          saleable=true;
+          flagName='上架';
+        }
+        this.$message.confirm('是否确认'+flagName+'?', '提示', {
+          confirmButtonText: '确定'+flagName,
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$http.put("/item/spu/upOrDownSpuBySpuId?saleable="+ saleable+"&spuId="+spuId).then(() => {
+            this.getDataFromServer();
+            this.$message.success(flagName+"成功");
+          }).catch( () => {
+            this.$message.error(flagName+"失败");
+          });
+        }).catch(()=>{
+          this.$message.info('已取消'+flagName);
+        });
+      },
       addGoods() {
         // 修改标记
         this.isEdit = false;
@@ -159,8 +192,9 @@
       },
       async editGoods(oldGoods) {
         // 发起请求，查询商品详情和skus
-        oldGoods.spuDetail = await this.$http.loadData("/item/spu/detail/" + oldGoods.id);
-        oldGoods.skus = await this.$http.loadData("/item/sku/list?id=" + oldGoods.id);
+        oldGoods.spuDetail = await this.$http.loadData("/item/spuDetail/querySpuDetailBySpuId/" + oldGoods.id);
+        oldGoods.skus = await this.$http.loadData("/item/sku/querySkuBySpuId?spuId=" + oldGoods.id);
+
         // 修改标记
         this.isEdit = true;
         // 控制弹窗可见：
@@ -189,6 +223,7 @@
       }
     },
     components: {
+      Checkbox,
       GoodsForm,
       MyGoodsForm
     }
